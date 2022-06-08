@@ -5,8 +5,6 @@ info:
     This is a sample Recipes server.  
   version: "1.0.0"
   title: Recipe Wizards
-  contact:
-    email: apiteam@swagger.io
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -17,32 +15,32 @@ servers:
 
     
 tags:
-  - name: register
-    description: Everything about register
+  - name: Register
+    description: register to the site
     
-  - name: login
-    description: Everything about login
+  - name: Login
+    description: login to the site
     
-  - name: logout
-    description: Everything about login
+  - name: Logout
+    description: logout from the site
   
-  - name: recipes
-    description: Everything about login
+  - name: Recipes
+    description: show recipes
     
 paths:
 
-  /register:
+  /Register:
     post:
       tags:
-        - register
+        - Register
       summary: Add a new user to the server
       operationId: registerUser
       responses:
         '201':
           description: Registered successfully
           
-        '400':
-          description: Invalid input
+        '409':
+          description: Username taken
           
       requestBody:
         required: true
@@ -53,17 +51,17 @@ paths:
               items:
                 $ref: '#/components/schemas/Register'
 
-  /login:
+  /Login:
     post:
       tags:
-        - login
+        - Login
       summary: Login to the server
       operationId: loginUser
       responses:
         '200':
           description: Logged in successfully
-        '400':
-          description: Invalid input
+        '401':
+          description: Username or Password incorrect
       requestBody:
         required: true
         content:
@@ -73,10 +71,10 @@ paths:
               items:
                 $ref: '#/components/schemas/Login'
 
-  /logout:
+  /Logout:
     post:
       tags:
-        - logout
+        - Logout
       summary: Logout from the server
       operationId: logoutUser
       responses:
@@ -84,7 +82,7 @@ paths:
           description: Logged out successfully
 
 
-              
+           
               
   /recipes/main:
     get:
