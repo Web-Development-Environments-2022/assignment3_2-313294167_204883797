@@ -44,14 +44,14 @@ router.post("/Register", async (req, res, next) => {
 router.post("/Login", async (req, res, next) => {
   try {
     // check that username exists
-    const users = await DButils.execQuery("SELECT username FROM users");
-    if (!users.find((x) => x.username === req.body.username))
+    const users = await DButils.execQuery("SELECT userName FROM users");
+    if (!users.find((x) => x.userName === req.body.username))
       throw { status: 401, message: "Username or Password incorrect" };
 
     // check that the password is correct
     const user = (
       await DButils.execQuery(
-        `SELECT * FROM users WHERE username = '${req.body.username}'`
+        `SELECT * FROM users WHERE userName = '${req.body.username}'`
       )
     )[0];
 
