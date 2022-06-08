@@ -1,12 +1,10 @@
+---
 openapi: 3.0.0
 info:
   description: |
-    This is a sample Petstore server.  You can find
-    out more about Swagger at
-    [http://swagger.io](http://swagger.io) or on
-    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+    This is a sample Recipes server.  
   version: "1.0.0"
-  title: Swagger Petstore
+  title: Recipe Wizards
   contact:
     email: apiteam@swagger.io
   license:
@@ -14,14 +12,9 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
   # Added by API Auto Mocking Plugin
-  # Added by API Auto Mocking Plugin
-  # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/GefenShahar/WEB-DEV-API/1.0.0
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/shahargefen/WEB-DEV-API/1.0.0
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/bla84/WEB-DEV-API/1.0.0
+
     
 tags:
   - name: register
