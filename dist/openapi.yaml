@@ -2,7 +2,8 @@
 openapi: 3.0.0
 info:
   description: |
-    This is a sample Recipes server.  
+    This is a sample Recipes server, where you can save your favorite recipes, 
+    add share your family and personal recipes with other users. 
   version: "1.0.0"
   title: Recipe Wizards
   license:
@@ -15,26 +16,29 @@ servers:
 
     
 tags:
-  - name: Register
+  - name: register
     description: register to the site
     
-  - name: Login
+  - name: login
     description: login to the site
     
-  - name: Logout
+  - name: logout
     description: logout from the site
   
-  - name: Recipes
+  - name: recipes
     description: show recipes
+
+  - name: user
+    description: logged in user actions
     
 paths:
 
-  /Register:
+  /register:
     post:
       tags:
-        - Register
+        - register
       summary: Add a new user to the server
-      operationId: registerUser
+      description: A new record containing the new user details is added to the database
       responses:
         '201':
           description: Registered successfully
@@ -51,10 +55,10 @@ paths:
               items:
                 $ref: '#/components/schemas/Register'
 
-  /Login:
+  /login:
     post:
       tags:
-        - Login
+        - login
       summary: Login to the server
       operationId: loginUser
       responses:
@@ -71,10 +75,10 @@ paths:
               items:
                 $ref: '#/components/schemas/Login'
 
-  /Logout:
+  /logout:
     post:
       tags:
-        - Logout
+        - logout
       summary: Logout from the server
       operationId: logoutUser
       responses:
@@ -82,8 +86,7 @@ paths:
           description: Logged out successfully
 
 
-           
-              
+                     
   /recipes/main:
     get:
       tags:
@@ -192,22 +195,51 @@ paths:
                $ref: '#/components/schemas/Add'
   
   
-  /recipes/myfavorites:
-    get:
+  /user/favorites/{id}:
+    post:
+      parameters: 
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
       tags:
-        - recipes
-      summary: Show my favorites recipes.
-      operationId: favoritesRecipes
+        - user
+      summary: Save a recipe to favorites
+      operationId: markAsFavorite
       responses:
         '200':
-          description: successful operation
+          description: The recipe was successfully saved as a favorite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: array
+              items:
+                $ref: '#/components/schemas/Favorites'
+
+    get:
+      parameters: 
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      tags:
+        - user
+      summary: Show my favorites recipes.
+      operationId: getFavoriteRecipes
+      responses:
+        '200':
+          description: get favorite recipes for user by id
 
                 
                 
-  /recipes/myrecipes:
+  /user/myrecipes:
     get:
       tags:
-        - recipes
+        - user
       summary: Show my recipes.
       operationId: myRecipes
       responses:
@@ -216,10 +248,10 @@ paths:
 
                 
                 
-  /recipes/familyrecipes:
+  /user/familyrecipes:
     get:
       tags:
-        - recipes
+        - user
       summary: Show my family recipes.
       operationId: familyRecipes
       responses:
@@ -273,8 +305,6 @@ components:
             type: string
           password:
             type: string
-            
-    
 
     Search:
       type: object
@@ -287,3 +317,9 @@ components:
       properties:
           searchparam:
             type: string
+
+    Favorites:
+      type: object
+      properties:
+          recipe_id:
+            type: integer
