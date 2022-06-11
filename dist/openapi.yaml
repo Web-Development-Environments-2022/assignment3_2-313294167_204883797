@@ -234,7 +234,45 @@ paths:
         '200':
           description: get favorite recipes for user by id
 
-                
+  /user/lastViewed/{id}:
+    post:
+      parameters: 
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      tags:
+        - user
+      summary: Save a recipe to previosely viewed
+      operationId: markAsViewed
+      responses:
+        '200':
+          description: The recipe was successfully saved as a previosely viewed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: array
+              items:
+                $ref: '#/components/schemas/LastWatched'
+
+    get:
+      parameters: 
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      tags:
+        - user
+      summary: Show my previosely viewed recipes.
+      operationId: getLastViewedRecipes
+      responses:
+        '200':
+          description: get previosely viewed recipes for user by id
+
                 
   /user/myrecipes:
     get:
@@ -319,6 +357,12 @@ components:
             type: string
 
     Favorites:
+      type: object
+      properties:
+          recipe_id:
+            type: integer
+
+    LastWatched:
       type: object
       properties:
           recipe_id:

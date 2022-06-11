@@ -42,7 +42,8 @@ async function getRecipesPreview(recipes_id_array)
 {
     let ids = ""
     recipes_id_array.map((recipe_id) => {
-        ids += ("," + recipe_id);
+        if (recipe_id != null)
+            ids += ("," + recipe_id);
     })
     const response = await axios.get(`${api_domain}/informationBulk`, {
         params: {
