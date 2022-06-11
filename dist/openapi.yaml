@@ -274,8 +274,14 @@ paths:
           description: get previosely viewed recipes for user by id
 
                 
-  /user/myrecipes:
+  /user/myrecipes/{id}:
     get:
+      parameters: 
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
       tags:
         - user
       summary: Show my recipes.
@@ -286,8 +292,14 @@ paths:
 
                 
                 
-  /user/familyrecipes:
+  /user/familyrecipes/{id}:
     get:
+      parameters: 
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
       tags:
         - user
       summary: Show my family recipes.
