@@ -109,6 +109,17 @@ async function getThreeRandomRecipes()
     return extractPreviewRecipeDetails([filtered_random_pool[0], filtered_random_pool[1], filtered_random_pool[2]]);
 }
 
+async function addRecipe(recipe){
+    await DButils.execQuery(`INSERT INTO recipes(recipeID, title, addRecipe, readyInMinutes, popularity, vegan, vegetarian, glutenFree, image) VALUES ('${recipe.id}','${recipe.title}','${recipe.readyInMinutes}','${recipe.image}','${recipe.popularity}','${recipe.vegan}', '${recipe.vegetarian}','${recipe.glutenFree}' ,'${recipe.image}' )`);
+}
+
+async function getPlace(place){
+    await DButils.execQuery(`SELECT * FROM recipes WHERE viewed = '${place}' `)
+}
+
+async function setPlace(recipe,place){
+    await DButils.execQuery(`UPDATE recipes SET viewed = '${place}' WHERE recipeID = '${recipe.id}' `)
+}
 
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
