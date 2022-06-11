@@ -3,7 +3,6 @@ var router = express.Router();
 const MySql = require("../routes/utils/MySql");
 const DButils = require("../routes/utils/DButils");
 const bcrypt = require("bcrypt");
-var id = 1;
 
 router.post("/Register", async (req, res, next) => {
   try {
@@ -36,7 +35,6 @@ router.post("/Register", async (req, res, next) => {
         '${user_details.country}', '${user_details.email}', '${user_details.profilePic}')`
     );
     res.status(201).send({ message: "user created", success: true });
-    id++;
   } catch (error) {
     next(error);
   }

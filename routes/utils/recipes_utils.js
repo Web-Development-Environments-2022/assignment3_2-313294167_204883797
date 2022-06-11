@@ -70,9 +70,7 @@ async function getRandomRecipes()
 
 function extractPreviewRecipeDetails(recipes_info)
 {
-    console.log(recipes_info);
     return recipes_info.map((recipe_info) => {
-        console.log(recipe_info);
         let data = recipe_info;
         if (recipe_info.data) {
             data = recipe_info.data;

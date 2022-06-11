@@ -25,6 +25,7 @@ router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
     // TODO - show if user viewed the recipe
+    
     // TODO - show if in favorites
 
     res.send(recipe);
