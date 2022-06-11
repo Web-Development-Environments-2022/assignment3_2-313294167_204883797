@@ -31,8 +31,9 @@ router.post("/Register", async (req, res, next) => {
       parseInt(process.env.bcrypt_saltRounds)
     );
     await DButils.execQuery(
-      `INSERT INTO users VALUES (` + id + `, '${user_details.username}', '${hash_password}', '${user_details.firstname}', '${user_details.lastname}',
-      '${user_details.country}', '${user_details.email}', '${user_details.profilePic}')`
+      `INSERT INTO users (userName, password, firstName, lastName, country, email, profileSrc) VALUES 
+        ('${user_details.username}', '${hash_password}', '${user_details.firstname}', '${user_details.lastname}',
+        '${user_details.country}', '${user_details.email}', '${user_details.profilePic}')`
     );
     res.status(201).send({ message: "user created", success: true });
     id++;
