@@ -37,8 +37,8 @@ router.get("/:recipeId", async (req, res, next) => {
     }
     else if(viewedSecond.length==0){
       if(recipe.id!=viewedFirst[0].recipeID){
-        recipes_utils.setPlace(viewedFirst[0],2)
         await recipes_utils.addRecipe(user_id,recipe);
+        recipes_utils.setPlace(viewedFirst[0],2)
       }
     }
     else if(viewedThird.length==0){
@@ -47,9 +47,9 @@ router.get("/:recipeId", async (req, res, next) => {
         recipes_utils.setPlace(viewedSecond[0],1)
       }
       else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
+        await recipes_utils.addRecipe(user_id,recipe);
         recipes_utils.setPlace(viewedSecond[0],3)
         recipes_utils.setPlace(viewedFirst[0],2)
-        await recipes_utils.addRecipe(user_id,recipe);
       }
     }
 
@@ -58,6 +58,7 @@ router.get("/:recipeId", async (req, res, next) => {
 
       if((recipe.id!=viewedFirst[0].recipeID) && (recipe.id!=viewedSecond[0].recipeID) && (recipe.id!=viewedThird[0].recipeID)){
         var exist=recipes_utils.exist(recipe)
+        console.log(exist)
         if(exist.length>0){
           recipes_utils.setPlace(viewedSecond[0],3)
           recipes_utils.setPlace(viewedFirst[0],2)
@@ -65,9 +66,10 @@ router.get("/:recipeId", async (req, res, next) => {
           recipes_utils.setPlace(viewedThird[0],0)
         }
         else{
+          console.log(viewedFirst)
+          await recipes_utils.addRecipe(user_id,recipe);
           recipes_utils.setPlace(viewedSecond[0],3)
           recipes_utils.setPlace(viewedFirst[0],2)
-          await recipes_utils.addRecipe(user_id,recipe);
           recipes_utils.setPlace(viewedThird[0],0)
         }
       }
