@@ -131,6 +131,10 @@ async function exist(id){
 
 }
 
+async function checkFavorite(user_id){
+    return await DButils.execQuery(`SELECT webRecipeID FROM favorite_recipes WHERE user_id=${user_id}`)
+}
+
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
 exports.getThreeRandomRecipes = getThreeRandomRecipes;
@@ -138,5 +142,7 @@ exports.addRecipe = addRecipe;
 exports.getPlace = getPlace;
 exports.setPlace = setPlace;
 exports.exist = exist;
+exports.checkFavorite = checkFavorite;
+
 
 

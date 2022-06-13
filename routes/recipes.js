@@ -24,53 +24,59 @@ router.get("/", (req, res) => res.send("im here"));
 router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
+    //check if exist
+    var exist=await recipes_utils.exist(recipe)
+
     let seen = false;
+    let fav=false
 
     //logged in user_id
     const user_id = req.session.user_id;
 
     if (user_id != undefined)
     {  //The current last 3 seen
-      console.log(user_id)
       var viewedFirst=await recipes_utils.getPlace(1);
       var viewedSecond=await recipes_utils.getPlace(2);
       var viewedThird=await recipes_utils.getPlace(3);
 
       //If we clicked the first time
-      if(viewedFirst.length == 0){
-        await recipes_utils.addRecipe(user_id,recipe);
-      }
-
-      //If we clicked the second time
-      else if(viewedSecond.length==0){
-        //If we dont watch the last one seen
-        if(recipe.id!=viewedFirst[0].recipeID){
+        if(viewedFirst.length == 0){
           await recipes_utils.addRecipe(user_id,recipe);
-          recipes_utils.setPlace(viewedFirst[0],2)
         }
-      }
 
-      //If we clicked the third time
-      else if(viewedThird.length==0){
-        //If we watch the second one we need to swap between first and second
-        if(recipe.id==viewedSecond[0].recipeID){
-          recipes_utils.setPlace(viewedFirst[0],2)
-          recipes_utils.setPlace(viewedSecond[0],1)
-          seen = true;
+        //If we clicked the second time
+        else if(viewedSecond.length==0){
+          //If we dont watch the last one seen
+          if(recipe.id!=viewedFirst[0].recipeID){
+            await recipes_utils.addRecipe(user_id,recipe);
+            recipes_utils.setPlace(viewedFirst[0],2)
+          }
+          else{
+            seen = true;
+          }
         }
-        //If we watch new recipe
-        else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
-          await recipes_utils.addRecipe(user_id,recipe);
-          recipes_utils.setPlace(viewedSecond[0],3)
-          recipes_utils.setPlace(viewedFirst[0],2)
+
+        //If we clicked the third time
+        else if(viewedThird.length==0){
+          //If we watch the second one we need to swap between first and second
+          if(recipe.id==viewedSecond[0].recipeID){
+            recipes_utils.setPlace(viewedFirst[0],2)
+            recipes_utils.setPlace(viewedSecond[0],1)
+            seen = true;
+          }
+          //If we watch new recipe
+          else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
+            await recipes_utils.addRecipe(user_id,recipe);
+            recipes_utils.setPlace(viewedSecond[0],3)
+            recipes_utils.setPlace(viewedFirst[0],2)
+          }
         }
-      }
+      
 
       //If we watch more then three already
       else{
         //check if the new recipe isnt in the last 3 seen
         if((recipe.id!=viewedFirst[0].recipeID) && (recipe.id!=viewedSecond[0].recipeID) && (recipe.id!=viewedThird[0].recipeID)){
-          var exist=await recipes_utils.exist(recipe)
           //check if recipe in the DataBase
           if(exist.length>0){
             recipes_utils.setPlace(viewedSecond[0],3)
@@ -102,6 +108,16 @@ router.get("/:recipeId", async (req, res, next) => {
         }
 
     }
+    //check if the recipe is in favorite
+    let fav_rec=await recipes_utils.checkFavorite(user_id)
+    for(let i=0;i<fav_rec.length;i++){
+      if(fav_rec[i].webRecipeID==recipe.id){
+        fav=true
+        break;
+      }
+    }
+
+
     let new_recipe = {
       id: recipe.id,
       title : recipe.title,
@@ -111,7 +127,8 @@ router.get("/:recipeId", async (req, res, next) => {
       vegan: recipe.vegan,
       vegetarian: recipe.vegetarian,
       glutenFree: recipe.glutenFree,
-      seen: seen
+      seen: seen,
+      favorites: fav
     }
     res.send(new_recipe);
   }
