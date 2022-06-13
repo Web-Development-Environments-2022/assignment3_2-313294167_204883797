@@ -113,20 +113,20 @@ async function getThreeRandomRecipes()
 async function addRecipe(user_id,recipe){
     //userID
     //popularity
-    await DButils.execQuery(`INSERT INTO recipes(recipeID,userID, title, readyInMinutes,popularity, vegan, vegetarian, glutenFree,viewed, image) VALUES (${recipe.id},${user_id},'${recipe.title}',${recipe.readyInMinutes},${recipe.popularity},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree}, ${1},'${recipe.image}' )`);
+    await DButils.execQuery(`INSERT INTO lastviewedrecipes(recipeID,userID, title, readyInMinutes,popularity, vegan, vegetarian, glutenFree,viewed, image) VALUES (${recipe.id},${user_id},'${recipe.title}',${recipe.readyInMinutes},${recipe.popularity},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree}, ${1},'${recipe.image}' )`);
 }
 
 async function getPlace(place){
-    const recipe=await DButils.execQuery(`SELECT * FROM recipes WHERE viewed=${place}`)
+    const recipe=await DButils.execQuery(`SELECT * FROM lastviewedrecipes WHERE viewed=${place}`)
     return recipe;
 }
 
 async function setPlace(recipe,place){
-    await DButils.execQuery(`UPDATE recipes SET viewed=${place} WHERE recipeID=${recipe.recipeID}`)
+    await DButils.execQuery(`UPDATE lastviewedrecipes SET viewed=${place} WHERE recipeID=${recipe.recipeID}`)
 }
 
 async function exist(id){
-    const recipe=await DButils.execQuery(`SELECT * FROM recipes WHERE recipeID=${id.id}`)
+    const recipe=await DButils.execQuery(`SELECT * FROM lastviewedrecipes WHERE recipeID=${id.id}`)
     return recipe;
 
 }
