@@ -24,12 +24,14 @@ router.get("/", (req, res) => res.send("im here"));
 router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
+    let seen = false;
 
     //logged in user_id
     const user_id = req.session.user_id;
 
     if (user_id != undefined)
     {  //The current last 3 seen
+      console.log(user_id)
       var viewedFirst=await recipes_utils.getPlace(1);
       var viewedSecond=await recipes_utils.getPlace(2);
       var viewedThird=await recipes_utils.getPlace(3);
@@ -54,6 +56,7 @@ router.get("/:recipeId", async (req, res, next) => {
         if(recipe.id==viewedSecond[0].recipeID){
           recipes_utils.setPlace(viewedFirst[0],2)
           recipes_utils.setPlace(viewedSecond[0],1)
+          seen = true;
         }
         //If we watch new recipe
         else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
@@ -74,6 +77,7 @@ router.get("/:recipeId", async (req, res, next) => {
             recipes_utils.setPlace(viewedFirst[0],2)
             recipes_utils.setPlace(exist[0],1);
             recipes_utils.setPlace(viewedThird[0],0)
+            seen = true;
           }
           //the recipe isnt in the DataBase
           else{
@@ -87,20 +91,34 @@ router.get("/:recipeId", async (req, res, next) => {
         else if(recipe.id==viewedSecond[0].recipeID){
           recipes_utils.setPlace(viewedFirst[0],2)
           recipes_utils.setPlace(viewedSecond[0],1)
+          seen = true;
         }
         //if the recipe is 3 last seen
         else if(recipe.id==viewedThird[0].recipeID){
           recipes_utils.setPlace(viewedSecond[0],3)
           recipes_utils.setPlace(viewedFirst[0],2)
           recipes_utils.setPlace(viewedThird[0],1)
+          seen = true;
         }
 
     }
+    let new_recipe = {
+      id: recipe.id,
+      title : recipe.title,
+      readyInMinutes: recipe.readyInMinutes,
+      image: recipe.image,
+      popularity: recipe.aggregateLikes,
+      vegan: recipe.vegan,
+      vegetarian: recipe.vegetarian,
+      glutenFree: recipe.glutenFree,
+      seen: seen
+    }
+    res.send(new_recipe);
   }
-    
-    // TODO - show if in favorites
-
+  else
+  {
     res.send(recipe);
+  } 
   } catch (error) {
     next(error);
   }
