@@ -70,6 +70,9 @@ router.get("/:recipeId", async (req, res, next) => {
             recipes_utils.setPlace(viewedSecond[0],3)
             recipes_utils.setPlace(viewedFirst[0],2)
           }
+          else{
+            seen = true;
+          }
         }
       
 
@@ -94,7 +97,13 @@ router.get("/:recipeId", async (req, res, next) => {
           }
         }
         //if the recipe is in second last seen need to swap first and second
+
+        else if(recipe.id==viewedFirst[0].recipeID){
+          seen = true;
+        }
+
         else if(recipe.id==viewedSecond[0].recipeID){
+
           recipes_utils.setPlace(viewedFirst[0],2)
           recipes_utils.setPlace(viewedSecond[0],1)
           seen = true;
