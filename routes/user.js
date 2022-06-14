@@ -4,9 +4,13 @@ const DButils = require("./utils/DButils");
 const user_utils = require("./utils/user_utils");
 const recipe_utils = require("./utils/recipes_utils");
 
+
 /**
  * Authenticate all incoming requests by middleware
  */
+
+
+
 router.use(async function (req, res, next) {
   if (req.session && req.session.user_id) {
     DButils.execQuery("SELECT user_id FROM users").then((users) => {
@@ -128,7 +132,6 @@ router.post('/personal', async (req,res,next) => {
   {
     const user_id = req.session.user_id;
     //insert new personal recipe
-    console.log(req.body)
     await recipe_utils.postPersonalRecipes(req.body,user_id);
     let new_recipe = {
       id: req.body.id,
@@ -147,5 +150,15 @@ router.post('/personal', async (req,res,next) => {
         next(error); 
     }
 })
+
+
+router.get('/search/:query', async (req,res,next) => {
+  try{
+    const search= await user_utils.getRecipeInformationQuery(req.params.query) ;
+    res.status(200).send(search.data);
+  } catch(error){
+    next(error); 
+  }
+});
 
 module.exports = router;

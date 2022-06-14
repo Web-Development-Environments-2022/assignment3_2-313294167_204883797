@@ -137,7 +137,6 @@ async function checkFavorite(user_id){
 
 
 async function getPersonalRecipes(user_id){
-    console.log(user_id)
     return await DButils.execQuery(`SELECT * FROM personal_recipes WHERE user_id=${user_id}`)
 }
 

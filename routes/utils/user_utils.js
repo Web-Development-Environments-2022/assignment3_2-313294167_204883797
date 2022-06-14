@@ -1,4 +1,18 @@
 const DButils = require("./DButils");
+const api_domain = "https://api.spoonacular.com/recipes";
+const axios = require("axios");
+
+
+
+async function getRecipeInformationQuery(query) {
+ return await axios.get(`${api_domain}/complexSearch?query=${query}`, {
+     params: {
+         includeNutrition: false,
+         apiKey: process.env.spooncular_apiKey
+     }
+ });
+}
+
 
 async function markAsFavorite(user_id, recipe_id){
     await DButils.execQuery(`INSERT INTO favorite_recipes(user_id, webRecipeID) VALUES ('${user_id}',${recipe_id})`);
@@ -44,3 +58,4 @@ exports.markAsFavorite = markAsFavorite;
 exports.getFavoriteRecipes = getFavoriteRecipes;
 exports.getThreeLastViewed = getThreeLastViewed;
 exports.markAsLastViewed = markAsLastViewed;
+exports.getRecipeInformationQuery = getRecipeInformationQuery;
