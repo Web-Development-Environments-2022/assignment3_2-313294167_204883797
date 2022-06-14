@@ -10,7 +10,7 @@ router.get("/", (req, res) => res.send("im here"));
  */
  router.get("/random", async (req, res, next) => {
   try {
-    let random_3_recipes = await recipes_utils.getThreeRandomRecipes();
+    let random_3_recipes = await recipes_utils.getThreeRandomRecipes(req.session.user_id);
     res.send(random_3_recipes);
   } catch (error) {
     next(error);
@@ -25,7 +25,7 @@ router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
     //check if exist
-    var exist=await recipes_utils.exist(recipe)
+    var exist=await recipes_utils.getPreviouslyViewed(recipe)
 
     let seen = false;
     let fav=false
@@ -126,6 +126,9 @@ router.get("/:recipeId", async (req, res, next) => {
       }
     }
 
+    let ingredients = recipes_utils.getIngredients(recipe.id);
+    let servings = recipes_utils.getServings(recipe.id);
+    let steps = recipes_utils.getSteps(recipe.id)
 
     let new_recipe = {
       id: recipe.id,
@@ -136,8 +139,12 @@ router.get("/:recipeId", async (req, res, next) => {
       vegan: recipe.vegan,
       vegetarian: recipe.vegetarian,
       glutenFree: recipe.glutenFree,
-      seen: seen,
-      favorites: fav
+      viewed: seen,
+      favorites: fav,
+      //TODO - add ingredients list + steps + servings
+      ingredients: ingredients,
+      servings: servings,
+      steps: steps,
     }
     res.send(new_recipe);
   }
@@ -151,5 +158,13 @@ router.get("/:recipeId", async (req, res, next) => {
 });
 
 
+router.get('/search/:query', async (req,res,next) => {
+  try{
+    const search= await user_utils.getRecipeInformationQuery(req.params.query) ;
+    res.status(200).send(search.data);
+  } catch(error){
+    next(error); 
+  }
+});
 
 module.exports = router;

@@ -12,25 +12,20 @@ info:
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/GefenShahar/WEB-DEV-API/1.0.0
+    url: https://virtserver.swaggerhub.com/leah_shahar/recipes/1.0.0
 
     
 tags:
-  - name: register
-    description: register to the site
-    
-  - name: login
-    description: login to the site
-    
-  - name: logout
-    description: logout from the site
+  - name: auth
+    description: all authentication related actions
   
   - name: recipes
-    description: show recipes
+    description: all recipe related actions
 
-  - name: user
+  - name: users
     description: logged in user actions
-    
+
+
 paths:
 
   /register:
@@ -87,102 +82,62 @@ paths:
 
 
                      
-  /recipes/main:
+  /recipes/random:
     get:
       tags:
         - recipes
       summary: Get 3 random recipes.
-      operationId: getRandomRecipes
+      operationId: getThreeRandomRecipes
       responses:
         '200':
-          description: successful operation
-
-        
-    post:
-      tags:
-        - login
-      summary: Login to the server
-      operationId: loginUserMain
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: 
-              type: array
-              items:
-                $ref: '#/components/schemas/Login'
-              
-      responses:
-        '200':
-          description: Logged in successfully
-        '400':
-          description: Invalid input
+          description: 3 random recipes returned
 
 
-  /recipes/main/{id}:
+  /recipes/{recipeId}:
    get:
       parameters: 
       - in: path
-        name: id
+        name: recipeId
         schema:
           type: integer
         required: true
       tags:
         - recipes
-      summary: Get 3 random recipes and 3 latest.
-      operationId: getRandomRecipesLoggedIn
+      summary: return full details of a recipe by its id
+      operationId: getRecipeDetails
       responses:
         '200':
           description: successful operation
 
-                
-    
 
-  /recipes/{id}:
+  
+  /recipes/search/{query}:
     get:
       parameters: 
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-  
+        - in: path
+          name: query
+          schema:
+            type: string
+          required: true
       tags:
         - recipes
-      summary: Show recipe summery.
-      operationId: recipeSummery
+      summary: search for recipe.
+      operationId: getRecipeInformationQuery
       responses:
         '200':
-          description: successful operation
+          description: returns recipes that fit query
 
                 
-  
-  /recipes/search:
-    get:
-      tags:
-        - recipes
-      summary: search recipe.
-      operationId: searchRecipe
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/Search'
-                
 
-  /recipes/add:
+  /users/personal:
     post:
       tags:
-        - recipes
-      summary: Add recipe to the server
+        - users
+      summary: Add personal recipe
       operationId: addRecipe
       responses:
         '201':
-          description: Add recipe successfully
+          description: recipe added successfully
         '400':
           description: Invalid input
       requestBody:
@@ -193,6 +148,21 @@ paths:
               type: array
               items:
                $ref: '#/components/schemas/Add'
+
+    get:
+      tags:
+        - recipes
+      summary: search for recipe.
+      operationId: getRecipeInformationQuery
+      responses:
+        '200':
+          description: returns recipes that fit query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/Search'
   
   
   /user/favorites/{id}:
@@ -354,12 +324,6 @@ components:
           username:
             type: string
           password:
-            type: string
-
-    Search:
-      type: object
-      properties:
-          searchparam:
             type: string
             
     Add:

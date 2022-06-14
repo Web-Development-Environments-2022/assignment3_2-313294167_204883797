@@ -40,7 +40,6 @@ async function getRecipeDetails(recipe_id)
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
-        
     }
 }
 
@@ -49,7 +48,7 @@ async function getRecipeDetails(recipe_id)
  * @param {*} recipes_id_array 
  * @returns 
  */
-async function getRecipesPreview(recipes_id_array)
+async function getRecipesPreview(user_id, recipes_id_array)
 {
     let ids = ""
     recipes_id_array.map((recipe_id) => {
@@ -65,7 +64,7 @@ async function getRecipesPreview(recipes_id_array)
             apiKey: process.env.spooncular_apiKey
         }
     });
-    return extractPreviewRecipeDetails(recipes_info.data)
+    return extractPreviewRecipeDetails(user_id, recipes_info.data)
 }
 
 /**
@@ -90,7 +89,7 @@ async function getRandomRecipes()
  * @param {*} recipes_info 
  * @returns 
  */
-function extractPreviewRecipeDetails(recipes_info)
+function extractPreviewRecipeDetails(user_id, recipes_info)
 {
     return recipes_info.map((recipe_info) => {
         let data = recipe_info;
@@ -107,6 +106,33 @@ function extractPreviewRecipeDetails(recipes_info)
             vegetarian,
             glutenFree,
         } = data;
+
+        if (user_id == undefined)
+        {
+            return {
+                id: id,
+                title : title,
+                readyInMinutes: readyInMinutes,
+                image: image,
+                popularity: aggregateLikes,
+                vegan: vegan,
+                vegetarian: vegetarian,
+                glutenFree: glutenFree,
+                viewed: false,
+                favorites: false
+            }
+        }
+        
+        let seen = DButils.execQuery(`SELECT seen FROM last_viewed_recipes WHERE recipeID='${data.id}' AND userID='${user_id}'`)
+        let viewed;
+        if (seen == 0 || seen == 1 || seen == 2 || seen == 3) { viewed = true; }
+        else { viewed = false; }
+
+        let favDB = DButils.execQuery(`SELECT * FROM favorite_recipes WHERE webRecipeID='${data.id}' AND user_id='${user_id}'`)
+        if (favDB == []) { fav = false; }
+        else { fav = true; }
+
+
         return {
             id: id,
             title : title,
@@ -116,6 +142,8 @@ function extractPreviewRecipeDetails(recipes_info)
             vegan: vegan,
             vegetarian: vegetarian,
             glutenFree: glutenFree,
+            viewed: viewed,
+            favorites: fav
         }
     })
 }
@@ -123,13 +151,14 @@ function extractPreviewRecipeDetails(recipes_info)
 /**
  * @returns 3 preview details for 3 random recipes from spooncular
  */
-async function getThreeRandomRecipes()
+async function getThreeRandomRecipes(user_id)
 {
     let random_pool = await getRandomRecipes();
     let filtered_random_pool = random_pool.data.recipes.filter((random) => (random.instructions != "") && (random.image))
     if (filtered_random_pool < 3) { return getThreeRandomRecipes(); }
-    return extractPreviewRecipeDetails([filtered_random_pool[0], filtered_random_pool[1], filtered_random_pool[2]]);
+    return extractPreviewRecipeDetails(user_id, [filtered_random_pool[0], filtered_random_pool[1], filtered_random_pool[2]]);
 }
+
 
 async function addRecipe(user_id,recipe)
 {
@@ -153,15 +182,50 @@ async function checkFavorite(user_id){
     return await DButils.execQuery(`SELECT webRecipeID FROM favorite_recipes WHERE user_id=${user_id}`)
 }
 
-
-async function getPersonalRecipes(user_id){
-    return await DButils.execQuery(`SELECT * FROM personal_recipes WHERE user_id=${user_id}`)
+async function getIngredients(recipe_id)
+{
+    const ingredientsAPI = await axios.get(`${api_domain}/'${recipe_id}'/ingredientWidget.json`,
+    {
+        params: 
+        {
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+    let ingredients = [];
+    ingredientsAPI.data.map((ingredient) => {  
+        ingredients.push(ingredient.name);
+    });
+    return ingredients;
 }
 
-async function postPersonalRecipes(recipe,user_id){
-    await DButils.execQuery(`INSERT INTO personal_recipes(user_id, title, readyInMinutes, vegan, vegetarian, glutenFree, imageSrc) VALUES (${user_id},'${recipe.title}',${recipe.readyInMinutes},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree},'${recipe.image}' )`);
+async function getServings(recipe_id)
+{
+    const recipe = await axios.get(`${api_domain}/'${recipe_id}'/information`,
+    {
+        params: 
+        {
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+    return recipe.data.servings;
 }
 
+
+async function getSteps(recipe_id)
+{
+    const analyzedInstructions = await axios.get(`${api_domain}/'${recipe_id}'/analyzedInstructions`,
+    {
+        params: 
+        {
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+    let steps = [];
+    analyzedInstructions.data.steps.map((step) => {  
+        steps.push(step.step);
+    });
+    return ingredients;
+}
 
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
@@ -171,8 +235,6 @@ exports.getPlace = getPlace;
 exports.setPlace = setPlace;
 exports.getPreviouslyViewed = getPreviouslyViewed;
 exports.checkFavorite = checkFavorite;
-exports.getPersonalRecipes = getPersonalRecipes;
-exports.postPersonalRecipes = postPersonalRecipes;
-
-
-
+exports.getIngredients = getIngredients;
+exports.getServings = getServings;
+exports.getSteps = getSteps;

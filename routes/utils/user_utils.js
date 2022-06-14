@@ -4,7 +4,8 @@ const axios = require("axios");
 
 
 
-async function getRecipeInformationQuery(query) {
+async function getRecipeInformationQuery(query) 
+{
  return await axios.get(`${api_domain}/complexSearch?query=${query}`, {
      params: {
          includeNutrition: false,
@@ -53,9 +54,21 @@ async function markAsLastViewed(user_id, recipe_id){
 }
 
 
+async function getPersonalRecipes(user_id)
+{
+    return await DButils.execQuery(`SELECT * FROM personal_recipes WHERE user_id=${user_id}`)
+}
+
+async function addPersonalRecipes(recipe,user_id){
+    await DButils.execQuery(`INSERT INTO personal_recipes(user_id, title, readyInMinutes, vegan, vegetarian, glutenFree, imageSrc) 
+        VALUES('${user_id}','${recipe.title}','${recipe.readyInMinutes}','${recipe.vegan}', '${recipe.vegetarian}', '${recipe.glutenFree}', '${recipe.image}')`);
+}
+
 
 exports.markAsFavorite = markAsFavorite;
 exports.getFavoriteRecipes = getFavoriteRecipes;
 exports.getThreeLastViewed = getThreeLastViewed;
 exports.markAsLastViewed = markAsLastViewed;
 exports.getRecipeInformationQuery = getRecipeInformationQuery;
+exports.getPersonalRecipes = getPersonalRecipes;
+exports.addPersonalRecipes = addPersonalRecipes;
