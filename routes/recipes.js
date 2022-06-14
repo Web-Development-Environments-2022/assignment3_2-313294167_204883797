@@ -6,7 +6,7 @@ router.get("/", (req, res) => res.send("im here"));
 
 
 /**
- * This path returns 3 random preview recipes
+ * This path returns 3 random recipes preview 
  */
  router.get("/random", async (req, res, next) => {
   try {
@@ -19,58 +19,59 @@ router.get("/", (req, res) => res.send("im here"));
 
 
 /**
- * This path returns a full details of a recipe by its id
+ * This path returns full details of a recipe by its id
  */
 router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
-    //check if exist
-    var exist=await recipes_utils.exist(recipe)
-
+    
+    let previously_viewed_recipe = await recipes_utils.getPreviouslyViewed(recipe)
     let seen = false;
-    let fav=false
+    let fav = false
 
     //logged in user_id
     const user_id = req.session.user_id;
 
     if (user_id != undefined)
-    {  //The current last 3 seen
-      var viewedFirst=await recipes_utils.getPlace(1);
-      var viewedSecond=await recipes_utils.getPlace(2);
-      var viewedThird=await recipes_utils.getPlace(3);
+    { 
+      //get the current last 3 recipes viewed 
+      var viewedFirst = await recipes_utils.getPlace(1);
+      var viewedSecond = await recipes_utils.getPlace(2);
+      var viewedThird = await recipes_utils.getPlace(3);
 
-      //If we clicked the first time
-        if(viewedFirst.length == 0){
+      //with no previously viewed recipes
+      if(viewedFirst.length == 0)
+      {
+        await recipes_utils.addRecipe(user_id, recipe);
+      }
+
+      //If we clicked the second time
+      else if(viewedSecond.length==0){
+        //If we dont watch the last one seen
+        if(recipe.id!=viewedFirst[0].recipeID){
+          await recipes_utils.addRecipe(user_id, recipe);
+          recipes_utils.setPlace(viewedFirst[0],2)
+        }
+        else{
+          seen = true;
+        }
+      }
+
+      //If we clicked the third time
+      else if(viewedThird.length==0){
+        //If we watch the second one we need to swap between first and second
+        if(recipe.id==viewedSecond[0].recipeID){
+          recipes_utils.setPlace(viewedFirst[0],2)
+          recipes_utils.setPlace(viewedSecond[0],1)
+          seen = true;
+        }
+        //If we watch new recipe
+        else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
           await recipes_utils.addRecipe(user_id,recipe);
+          recipes_utils.setPlace(viewedSecond[0],3)
+          recipes_utils.setPlace(viewedFirst[0],2)
         }
-
-        //If we clicked the second time
-        else if(viewedSecond.length==0){
-          //If we dont watch the last one seen
-          if(recipe.id!=viewedFirst[0].recipeID){
-            await recipes_utils.addRecipe(user_id,recipe);
-            recipes_utils.setPlace(viewedFirst[0],2)
-          }
-          else{
-            seen = true;
-          }
-        }
-
-        //If we clicked the third time
-        else if(viewedThird.length==0){
-          //If we watch the second one we need to swap between first and second
-          if(recipe.id==viewedSecond[0].recipeID){
-            recipes_utils.setPlace(viewedFirst[0],2)
-            recipes_utils.setPlace(viewedSecond[0],1)
-            seen = true;
-          }
-          //If we watch new recipe
-          else if((recipe.id!=viewedSecond[0].recipeID)&&(recipe.id!=viewedFirst[0].recipeID)){
-            await recipes_utils.addRecipe(user_id,recipe);
-            recipes_utils.setPlace(viewedSecond[0],3)
-            recipes_utils.setPlace(viewedFirst[0],2)
-          }
-        }
+      }
       
 
       //If we watch more then three already
@@ -78,10 +79,10 @@ router.get("/:recipeId", async (req, res, next) => {
         //check if the new recipe isnt in the last 3 seen
         if((recipe.id!=viewedFirst[0].recipeID) && (recipe.id!=viewedSecond[0].recipeID) && (recipe.id!=viewedThird[0].recipeID)){
           //check if recipe in the DataBase
-          if(exist.length>0){
+          if(previously_viewed_recipe.length>0){
             recipes_utils.setPlace(viewedSecond[0],3)
             recipes_utils.setPlace(viewedFirst[0],2)
-            recipes_utils.setPlace(exist[0],1);
+            recipes_utils.setPlace(previously_viewed_recipe[0],1);
             recipes_utils.setPlace(viewedThird[0],0)
             seen = true;
           }
