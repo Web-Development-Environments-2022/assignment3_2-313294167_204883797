@@ -135,6 +135,17 @@ async function checkFavorite(user_id){
     return await DButils.execQuery(`SELECT webRecipeID FROM favorite_recipes WHERE user_id=${user_id}`)
 }
 
+
+async function getPersonalRecipes(user_id){
+    console.log(user_id)
+    return await DButils.execQuery(`SELECT * FROM personal_recipes WHERE user_id=${user_id}`)
+}
+
+async function postPersonalRecipes(recipe,user_id){
+    await DButils.execQuery(`INSERT INTO personal_recipes(user_id, title, readyInMinutes, vegan, vegetarian, glutenFree, imageSrc) VALUES (${user_id},'${recipe.title}',${recipe.readyInMinutes},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree},'${recipe.image}' )`);
+}
+
+
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
 exports.getThreeRandomRecipes = getThreeRandomRecipes;
@@ -143,6 +154,8 @@ exports.getPlace = getPlace;
 exports.setPlace = setPlace;
 exports.exist = exist;
 exports.checkFavorite = checkFavorite;
+exports.getPersonalRecipes = getPersonalRecipes;
+exports.postPersonalRecipes = postPersonalRecipes;
 
 
 

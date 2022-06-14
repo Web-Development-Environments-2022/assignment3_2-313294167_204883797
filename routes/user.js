@@ -86,4 +86,66 @@ router.get('/favorites', async (req,res,next) => {
       }
  })
 
+
+ router.get('/personal', async (req,res,next) => {
+  try
+  {
+    const user_id = req.session.user_id;
+    //return all personal recipes
+
+    const results = await recipe_utils.getPersonalRecipes(user_id);
+    console.log(results)
+    var recipes=[]
+    for(var i=0;i<results.length;i++){
+      let new_recipe = {
+        id: results[i].id,
+        title : results[i].title,
+        readyInMinutes: results[i].readyInMinutes,
+        image: results[i].image,
+        vegan: results[i].vegan,
+        vegetarian: results[i].vegetarian,
+        glutenFree: results[i].glutenFree,
+        seen: true,
+        favorites: true
+      }
+      recipes.push(new_recipe)
+    }
+    if(recipes.length>0){
+      res.status(200).send(recipes);
+  }
+  else{
+    res.status(201).send("There is no personal recipes");
+  }
+    } catch(error){
+        next(error); 
+    }
+})
+
+
+
+router.post('/personal', async (req,res,next) => {
+  try
+  {
+    const user_id = req.session.user_id;
+    //insert new personal recipe
+    console.log(req.body)
+    await recipe_utils.postPersonalRecipes(req.body,user_id);
+    let new_recipe = {
+      id: req.body.id,
+      title : req.body.title,
+      readyInMinutes: req.body.readyInMinutes,
+      image: req.body.image,
+      vegan: req.body.vegan,
+      vegetarian: req.body.vegetarian,
+      glutenFree: req.body.glutenFree,
+      seen: true,
+      favorites: true
+    }
+
+    res.status(200).send(new_recipe);
+    } catch(error){
+        next(error); 
+    }
+})
+
 module.exports = router;
