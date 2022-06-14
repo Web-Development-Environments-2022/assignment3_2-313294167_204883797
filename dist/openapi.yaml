@@ -133,12 +133,12 @@ paths:
     post:
       tags:
         - users
-      summary: Add personal recipe
+      summary: Add personal recipe to user id
       operationId: addRecipe
       responses:
         '201':
           description: recipe added successfully
-        '400':
+        '406':
           description: Invalid input
       requestBody:
         required: true
@@ -152,11 +152,13 @@ paths:
     get:
       tags:
         - recipes
-      summary: search for recipe.
-      operationId: getRecipeInformationQuery
+      summary: get personal recipes by user id.
+      operationId: getPersonalRecipes
       responses:
         '200':
-          description: returns recipes that fit query
+          description: personal recipes returned
+        '204':
+          description: There is no personal recipes
           content:
             application/json:
               schema:
@@ -165,7 +167,7 @@ paths:
                  $ref: '#/components/schemas/Search'
   
   
-  /user/favorites/{id}:
+  /users/favorites/{id}:
     post:
       parameters: 
         - in: path
@@ -198,71 +200,15 @@ paths:
           required: true
       tags:
         - user
-      summary: Show my favorites recipes.
+      summary: Show favorites recipes by user id
       operationId: getFavoriteRecipes
       responses:
         '200':
           description: get favorite recipes for user by id
 
-  /user/lastViewed/{id}:
-    post:
-      parameters: 
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-      tags:
-        - user
-      summary: Save a recipe to previosely viewed
-      operationId: markAsViewed
-      responses:
-        '200':
-          description: The recipe was successfully saved as a previosely viewed
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: 
-              type: array
-              items:
-                $ref: '#/components/schemas/LastWatched'
-
-    get:
-      parameters: 
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-      tags:
-        - user
-      summary: Show my previosely viewed recipes.
-      operationId: getLastViewedRecipes
-      responses:
-        '200':
-          description: get previosely viewed recipes for user by id
-
+                            
                 
-  /user/myrecipes/{id}:
-    get:
-      parameters: 
-          - in: path
-            name: id
-            schema:
-              type: integer
-            required: true
-      tags:
-        - user
-      summary: Show my recipes.
-      operationId: myRecipes
-      responses:
-        '200':
-          description: successful operation
-
-                
-                
-  /user/familyrecipes/{id}:
+  /users/familyrecipes/{id}:
     get:
       parameters: 
           - in: path

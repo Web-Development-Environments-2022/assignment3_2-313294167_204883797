@@ -65,6 +65,11 @@ async function addPersonalRecipes(recipe,user_id){
 }
 
 
+async function getFamilyRecipes(user_id)
+{
+    return await DButils.execQuery(`SELECT * FROM family_recipes WHERE user_id=${user_id}`)
+}
+
 exports.markAsFavorite = markAsFavorite;
 exports.getFavoriteRecipes = getFavoriteRecipes;
 exports.getThreeLastViewed = getThreeLastViewed;
@@ -72,3 +77,4 @@ exports.markAsLastViewed = markAsLastViewed;
 exports.getRecipeInformationQuery = getRecipeInformationQuery;
 exports.getPersonalRecipes = getPersonalRecipes;
 exports.addPersonalRecipes = addPersonalRecipes;
+exports.getFamilyRecipes = getFamilyRecipes;

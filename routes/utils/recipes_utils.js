@@ -184,7 +184,7 @@ async function checkFavorite(user_id){
 
 async function getIngredients(recipe_id)
 {
-    const ingredientsAPI = await axios.get(`${api_domain}/'${recipe_id}'/ingredientWidget.json`,
+    const ingredientsAPI = await axios.get(`${api_domain}/${recipe_id}/ingredientWidget.json`,
     {
         params: 
         {
@@ -192,7 +192,7 @@ async function getIngredients(recipe_id)
         }
     });
     let ingredients = [];
-    ingredientsAPI.data.map((ingredient) => {  
+    ingredientsAPI.data.ingredients.map((ingredient) => {  
         ingredients.push(ingredient.name);
     });
     return ingredients;
@@ -200,7 +200,7 @@ async function getIngredients(recipe_id)
 
 async function getServings(recipe_id)
 {
-    const recipe = await axios.get(`${api_domain}/'${recipe_id}'/information`,
+    const recipe = await axios.get(`${api_domain}/${recipe_id}/information`,
     {
         params: 
         {
@@ -213,7 +213,7 @@ async function getServings(recipe_id)
 
 async function getSteps(recipe_id)
 {
-    const analyzedInstructions = await axios.get(`${api_domain}/'${recipe_id}'/analyzedInstructions`,
+    const analyzedInstructions = await axios.get(`${api_domain}/${recipe_id}/analyzedInstructions`,
     {
         params: 
         {
@@ -221,10 +221,10 @@ async function getSteps(recipe_id)
         }
     });
     let steps = [];
-    analyzedInstructions.data.steps.map((step) => {  
+    analyzedInstructions.data[0].steps.map((step) => {  
         steps.push(step.step);
     });
-    return ingredients;
+    return steps;
 }
 
 exports.getRecipeDetails = getRecipeDetails;

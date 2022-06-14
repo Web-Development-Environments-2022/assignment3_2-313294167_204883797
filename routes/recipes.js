@@ -126,9 +126,9 @@ router.get("/:recipeId", async (req, res, next) => {
       }
     }
 
-    let ingredients = recipes_utils.getIngredients(recipe.id);
-    let servings = recipes_utils.getServings(recipe.id);
-    let steps = recipes_utils.getSteps(recipe.id)
+    let ingredients = await recipes_utils.getIngredients(recipe.id);
+    let servings = await recipes_utils.getServings(recipe.id);
+    let steps = await recipes_utils.getSteps(recipe.id)
 
     let new_recipe = {
       id: recipe.id,
@@ -141,7 +141,6 @@ router.get("/:recipeId", async (req, res, next) => {
       glutenFree: recipe.glutenFree,
       viewed: seen,
       favorites: fav,
-      //TODO - add ingredients list + steps + servings
       ingredients: ingredients,
       servings: servings,
       steps: steps,
