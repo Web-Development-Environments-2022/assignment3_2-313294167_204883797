@@ -10,11 +10,11 @@ const recipe_utils = require("./utils/recipes_utils");
  */
 router.use(async function (req, res, next) 
 {
-  if (req.session && req.session.user_id) 
+  if (req.session && req.session.user_name) 
   {
-    DButils.execQuery("SELECT user_id FROM users").then((users) => {
-      if (users.find((x) => x.user_id === req.session.user_id)) {
-        req.user_id = req.session.user_id;
+    DButils.execQuery("SELECT userName FROM users").then((users) => {
+      if (users.find((x) => x.userName === req.session.user_name)) {
+        req.user_name = req.session.user_name;
         next();
       }
     }).catch(err => next(err));
@@ -30,9 +30,9 @@ router.use(async function (req, res, next)
 router.post('/favorites', async (req,res,next) => {
   try
   {
-    const user_id = req.session.user_id;
+    const user_name = req.body.user_name;
     const recipe_id = req.body.recipe_id;
-    await user_utils.markAsFavorite(user_id, recipe_id);
+    await user_utils.markAsFavorite(user_name, recipe_id);
     res.status(200).send("The Recipe successfully saved as favorite");
   } catch(error) {
     next(error);
@@ -46,11 +46,11 @@ router.post('/favorites', async (req,res,next) => {
 router.get('/favorites', async (req,res,next) => {
   try
   {
-    const user_id = req.session.user_id;
-    const recipes_id = await user_utils.getFavoriteRecipes(user_id);
+    const user_name = req.session.user_name;
+    const recipes_id = await user_utils.getFavoriteRecipes(user_name);
     let recipes_id_array = [];
     recipes_id.map((element) => recipes_id_array.push(element.webRecipeID)); //extracting the recipe ids into array
-    const results = await recipe_utils.getRecipesPreview(user_id, recipes_id_array);
+    const results = await recipe_utils.getRecipesPreview(user_name, recipes_id_array);
     res.status(200).send(results);
   } catch(error) {
     next(error); 
@@ -64,8 +64,8 @@ router.get('/favorites', async (req,res,next) => {
 router.get('/personal', async (req,res,next) => {
   try
   {
-      const user_id = req.session.user_id;
-      const results = await user_utils.getPersonalRecipes(user_id);
+      const user_name = req.session.user_name;
+      const results = await user_utils.getPersonalRecipes(user_name);
       console.log(results)
       var recipes=[]
       for(var i=0;i<results.length;i++){
@@ -100,8 +100,8 @@ router.get('/personal', async (req,res,next) => {
 router.post('/personal', async (req,res,next) => {
   try
   {
-    const user_id = req.session.user_id;
-    await user_utils.addPersonalRecipes(req.body, user_id);
+    const user_name = req.session.user_name;
+    await user_utils.addPersonalRecipes(req.body, user_name);
     let new_recipe = {
       title : req.body.title,
       readyInMinutes: req.body.readyInMinutes,
@@ -126,34 +126,49 @@ router.post('/personal', async (req,res,next) => {
 router.get('/familyrecipes', async (req,res,next) => {
   try
   {
-      const user_id = req.session.user_id;
-      const results = await user_utils.getFamilyRecipes(user_id);
-      console.log(results)
-      var recipes=[]
-      for(var i=0;i<results.length;i++){
-        let new_recipe = {
-          id: results[i].id,
-          title : results[i].title,
-          readyInMinutes: results[i].readyInMinutes,
-          image: results[i].image,
-          vegan: results[i].vegan,
-          vegetarian: results[i].vegetarian,
-          glutenFree: results[i].glutenFree,
-          seen: true,
-          favorites: true
-        }
-        recipes.push(new_recipe)
-      }
-      if(recipes.length>0){
-        res.status(200).send(recipes);
-    }
-    else{
-      res.status(204).send("There are no family recipes");
-    }
+    const user_name = req.session.user_name;
+    const recipes_id = await user_utils.getFamilyRecipes(user_name);
+    let recipes_id_array = [];
+    recipes_id.map((element) => recipes_id_array.push(element.recipe_id)); //extracting the recipe ids into array
+    const results = await recipe_utils.getRecipesPreview(user_name, recipes_id_array);
+    res.status(200).send(results);
   } catch(error) {
-      next(error); 
+    next(error); 
   }
-})
+});
+
+/**
+ * This path returns the last 3 recipes that were seen by the logged-in user
+ */
+ router.get('/lastViewed', async (req,res,next) => {
+  try
+  {
+    const user_name = req.session.user_name;
+    const recipes_id = await user_utils.getThreeLastViewed(user_name);
+    let recipes_id_array = [];
+    recipes_id.map((element) => recipes_id_array.push(element.recipeID)); //extracting the recipe ids into array
+    const results = await recipe_utils.getRecipesPreview(user_name, recipes_id_array);
+    res.status(200).send(results);
+  } catch(error) {
+    next(error); 
+  }
+});
+
+/**
+ * This path returns a preview of the last searched recipe by this user
+ */
+router.get('/searchHistory/:recipeId', async (req,res,next) => {
+  try
+  {
+    const user_name = req.session.user_name;
+    let recipes_id_array = [];
+    recipes_id_array.push(req.params.recipeId); 
+    const results = await recipe_utils.getRecipesPreview(user_name, recipes_id_array);
+    res.status(200).send(results);
+  } catch(error) {
+    next(error); 
+  }
+});
 
 
 module.exports = router;

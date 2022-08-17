@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+var mysql = require('mysql2');
 require("dotenv").config();
 
 
@@ -12,7 +12,7 @@ connectionLimit:4,
 const pool = new mysql.createPool(config);
 
 const connection =  () => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => { 
   pool.getConnection((err, connection) => {
     if (err) reject(err);
     console.log("MySQL pool connected: threadId " + connection.threadId);

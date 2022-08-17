@@ -36,7 +36,7 @@ async function getRecipeDetails(recipe_id)
         title: title,
         readyInMinutes: readyInMinutes,
         image: image,
-        popularity: aggregateLikes,
+        aggregateLikes: aggregateLikes,
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
@@ -48,7 +48,7 @@ async function getRecipeDetails(recipe_id)
  * @param {*} recipes_id_array 
  * @returns 
  */
-async function getRecipesPreview(user_id, recipes_id_array)
+async function getRecipesPreview(user_name, recipes_id_array)
 {
     let ids = ""
     recipes_id_array.map((recipe_id) => {
@@ -64,7 +64,7 @@ async function getRecipesPreview(user_id, recipes_id_array)
             apiKey: process.env.spooncular_apiKey
         }
     });
-    return extractPreviewRecipeDetails(user_id, recipes_info.data)
+    return extractPreviewRecipeDetails(user_name, recipes_info.data)
 }
 
 /**
@@ -89,7 +89,7 @@ async function getRandomRecipes()
  * @param {*} recipes_info 
  * @returns 
  */
-function extractPreviewRecipeDetails(user_id, recipes_info)
+function extractPreviewRecipeDetails(user_name, recipes_info)
 {
     return recipes_info.map((recipe_info) => {
         let data = recipe_info;
@@ -107,14 +107,14 @@ function extractPreviewRecipeDetails(user_id, recipes_info)
             glutenFree,
         } = data;
 
-        if (user_id == undefined)
+        if (user_name == undefined)
         {
             return {
                 id: id,
                 title : title,
                 readyInMinutes: readyInMinutes,
                 image: image,
-                popularity: aggregateLikes,
+                aggregateLikes: aggregateLikes,
                 vegan: vegan,
                 vegetarian: vegetarian,
                 glutenFree: glutenFree,
@@ -122,15 +122,13 @@ function extractPreviewRecipeDetails(user_id, recipes_info)
                 favorites: false
             }
         }
-        
-        let seen = DButils.execQuery(`SELECT seen FROM last_viewed_recipes WHERE recipeID='${data.id}' AND userID='${user_id}'`)
-        let viewed;
-        if (seen == 0 || seen == 1 || seen == 2 || seen == 3) { viewed = true; }
-        else { viewed = false; }
+        const seen = DButils.execQuery(`SELECT viewed FROM last_viewed_recipes WHERE recipeID='${data.id}' AND user_name='${user_name}'`)
+        let viewed = false;
+        if (seen != []) { viewed = true; }
 
-        let favDB = DButils.execQuery(`SELECT * FROM favorite_recipes WHERE webRecipeID='${data.id}' AND user_id='${user_id}'`)
-        if (favDB == []) { fav = false; }
-        else { fav = true; }
+        let fav = false;
+        const favDB = DButils.execQuery(`SELECT * FROM favorite_recipes WHERE webRecipeID='${data.id}' AND user_name='${user_name}'`)
+        if (favDB != []) { fav = true; }
 
 
         return {
@@ -138,7 +136,7 @@ function extractPreviewRecipeDetails(user_id, recipes_info)
             title : title,
             readyInMinutes: readyInMinutes,
             image: image,
-            popularity: aggregateLikes,
+            aggregateLikes: aggregateLikes,
             vegan: vegan,
             vegetarian: vegetarian,
             glutenFree: glutenFree,
@@ -151,26 +149,26 @@ function extractPreviewRecipeDetails(user_id, recipes_info)
 /**
  * @returns 3 preview details for 3 random recipes from spooncular
  */
-async function getThreeRandomRecipes(user_id)
+async function getThreeRandomRecipes(user_name)
 {
     let random_pool = await getRandomRecipes();
     let filtered_random_pool = random_pool.data.recipes.filter((random) => (random.instructions != "") && (random.image))
     if (filtered_random_pool < 3) { return getThreeRandomRecipes(); }
-    return extractPreviewRecipeDetails(user_id, [filtered_random_pool[0], filtered_random_pool[1], filtered_random_pool[2]]);
+    return extractPreviewRecipeDetails(user_name, [filtered_random_pool[0], filtered_random_pool[1], filtered_random_pool[2]]);
 }
 
 
-async function addRecipe(user_id,recipe)
+async function addRecipe(user_name,recipe)
 {
-    await DButils.execQuery(`INSERT INTO last_viewed_recipes(recipeID,userID, title, readyInMinutes,popularity, vegan, vegetarian, glutenFree,viewed, image) VALUES (${recipe.id},${user_id},'${recipe.title}',${recipe.readyInMinutes},${recipe.popularity},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree}, ${1},'${recipe.image}' )`);
+    await DButils.execQuery(`INSERT INTO last_viewed_recipes(recipeID, user_name, title, readyInMinutes, aggregateLikes, vegan, vegetarian, glutenFree, viewed, image) VALUES (${recipe.id},'${user_name}','${recipe.title}',${recipe.readyInMinutes},${recipe.aggregateLikes},${recipe.vegan}, ${recipe.vegetarian},${recipe.glutenFree}, ${1},'${recipe.image}' )`);
 }
 
-async function getPlace(place){
-    return await DButils.execQuery(`SELECT * FROM last_viewed_recipes WHERE viewed=${place}`)
+async function getPlace(user_name,place){
+    return await DButils.execQuery(`SELECT * FROM last_viewed_recipes WHERE user_name='${user_name}' and viewed=${place}`)
 }
 
-async function setPlace(recipe,place){
-    await DButils.execQuery(`UPDATE last_viewed_recipes SET viewed=${place} WHERE recipeID=${recipe.recipeID}`)
+async function setPlace(user_name, recipe, place){
+    await DButils.execQuery(`UPDATE last_viewed_recipes SET viewed=${place} WHERE recipeID=${recipe.recipeID} and user_name='${user_name}'`)
 }
 
 async function getPreviouslyViewed(recipe_id)
@@ -178,8 +176,8 @@ async function getPreviouslyViewed(recipe_id)
     return await DButils.execQuery(`SELECT * FROM last_viewed_recipes WHERE recipeID=${recipe_id.id}`)
 }
 
-async function checkFavorite(user_id){
-    return await DButils.execQuery(`SELECT webRecipeID FROM favorite_recipes WHERE user_id=${user_id}`)
+async function checkFavorite(user_name){
+    return await DButils.execQuery(`SELECT webRecipeID FROM favorite_recipes WHERE user_name='${user_name}'`)
 }
 
 async function getIngredients(recipe_id)
@@ -193,7 +191,7 @@ async function getIngredients(recipe_id)
     });
     let ingredients = [];
     ingredientsAPI.data.ingredients.map((ingredient) => {  
-        ingredients.push(ingredient.name);
+        ingredients.push([ingredient.name, ingredient.amount.us.unit, ingredient.amount.us.value]);
     });
     return ingredients;
 }

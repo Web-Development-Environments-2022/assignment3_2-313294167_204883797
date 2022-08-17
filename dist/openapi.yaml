@@ -16,8 +16,6 @@ servers:
 
     
 tags:
-  - name: auth
-    description: all authentication related actions
   
   - name: recipes
     description: all recipe related actions
@@ -167,7 +165,7 @@ paths:
                  $ref: '#/components/schemas/Search'
   
   
-  /users/favorites/{id}:
+  /users/favorites:
     post:
       parameters: 
         - in: path
