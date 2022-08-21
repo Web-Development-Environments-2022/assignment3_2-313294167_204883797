@@ -225,6 +225,42 @@ async function getSteps(recipe_id)
     return steps;
 }
 
+async function getRecipeInformationQuery(query) 
+{
+ return await axios.get(`${api_domain}/complexSearch?query=${query}`, {
+     params: {
+         includeNutrition: false,
+         apiKey: process.env.spooncular_apiKey
+     }
+ });
+}
+
+async function getRecipeInformationQueryIngredients(query) 
+{
+ return await axios.get(`${api_domain}/findByIngredients?ingredients=${query}`, {
+     params: {
+         includeNutrition: false,
+         apiKey: process.env.spooncular_apiKey
+     }
+ });
+}
+
+async function getInfoByQuery(search, number, cuisine, diet, intolerance) {
+    let query = '';
+    if (search) query = `${search}`;
+    if (cuisine) query += `"&cuisine=${cuisine}`;
+    if (diet) query += `"&diet=${diet}`;
+    if (intolerance) query += `"&intolerance=${intolerance}`;
+    if(number) query+= `&number=${number}`;
+    console.log(query)
+    return await axios.get(`${api_domain}/complexSearch?query=${query}`, {
+        params: {
+            includeNutrition: false,
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+}
+
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
 exports.getThreeRandomRecipes = getThreeRandomRecipes;
@@ -236,3 +272,5 @@ exports.checkFavorite = checkFavorite;
 exports.getIngredients = getIngredients;
 exports.getServings = getServings;
 exports.getSteps = getSteps;
+exports.getRecipeInformationQueryIngredients = getRecipeInformationQueryIngredients;
+exports.getInfoByQuery = getInfoByQuery;
